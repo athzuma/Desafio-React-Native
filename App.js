@@ -1,20 +1,35 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { updateLocalData } from './src/services/data';
+import { Load } from './src/components/Load';
+import TabNavigator from './src/routes/TabNavigator';
 
 export default function App() {
+  const [updated, setUpdated] = React.useState(false);
+  const [hasError, setHasError] = React.useState(false);
+
+  React.useEffect(() => {
+    handleData();
+  }, []);
+
+  async function handleData() {
+    setHasError(false);
+    updateLocalData(function() {
+      setUpdated(true);
+    }, function() {
+      setHasError(false);
+    });
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <PaperProvider>
+        {updated
+          ? <TabNavigator />
+          : <Load tryAgainClick={() => handleData()} hasError={hasError}/>
+        }
+      </PaperProvider>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
